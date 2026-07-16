@@ -63,6 +63,36 @@ entry = build_tag_entry(
 context_text = build_context_from_tags(matched_seqs, tags)
 ```
 
+### Tag 结构
+
+每条 tag 是一个 JSON 对象，由 `build_tag_entry()` 生成、`TagStore.save()` 写入时自动分配 `seq`：
+
+```json
+{
+  "seq": 1,
+  "task_type": "data_analysis",
+  "data_source": ["db", "kb"],
+  "tools_used": ["sql_query"],
+  "title": "Q3销售额同比分析",
+  "keywords": ["销售额", "Q3", "同比"],
+  "q": "Q3 销售额同比变化多少？",
+  "a": "Q3 销售额同比增长 15%，环比增长 3%...",
+  "timestamp": "2026-07-16T21:45:00"
+}
+```
+
+| 字段 | 类型 | 来源 | 说明 |
+|------|------|------|------|
+| `seq` | `int` | `TagStore.save()` 自动分配 | 单调递增序号，匹配结果按此排序 |
+| `task_type` | `str` | 调用方传入 | 任务类型，供 `same_type` 维度匹配 |
+| `data_source` | `list[str]` | observations 自动提取 | 涉及的数据源：`db` / `sqlite` / `kb` |
+| `tools_used` | `list[str]` | observations 自动提取 | 使用的工具名称 |
+| `title` | `str` | **LLM 生成**（回退：query 截断） | 规范化主题标签，概括本轮内容 |
+| `keywords` | `list[str]` | **LLM 生成**（回退：jieba 分词） | 整词关键词，用于 Jaccard 初筛 |
+| `q` | `str` | 调用方传入 | 用户原始问题全文 |
+| `a` | `str` | 调用方传入 | LLM 回复全文（注入时压缩） |
+| `timestamp` | `str` | 自动生成 | ISO 8601 时间戳 |
+
 ### TagMatcher — 三层匹配引擎
 
 | 策略 | 维度 | 速度 | 精度 | 适用场景 |
