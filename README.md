@@ -1,4 +1,4 @@
-# Tag System — LLM 自主上下文管理
+# auto-context — LLM 自主上下文管理 <sup>v0.1.0</sup>
 
 让 LLM 自己管理对话上下文，不再需要手动裁剪历史、拼接 prompt。
 
